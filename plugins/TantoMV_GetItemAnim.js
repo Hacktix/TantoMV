@@ -13,6 +13,14 @@ TantoMV.GetItemAnim = 1.0;
  * @param == Pickup Sound ==
  * @default
  * 
+ * @param Play Pickup Sounds
+ * @desc Whether or not sounds should be played when the player obtains an item.
+ * @type boolean
+ * @default true
+ * @on Yes
+ * @off No
+ * @parent == Pickup Sound ==
+ * 
  * @param Pickup Sound
  * @desc The name of the sound which should be played by default when an item is picked up.
  * @default Item3
@@ -42,6 +50,14 @@ TantoMV.GetItemAnim = 1.0;
  * 
  * @param == Display Options ==
  * @default
+ * 
+ * @param Play Animation by Default
+ * @desc Whether the animation should be automatically played by default or has to be enabled manually using Note Tags.
+ * @type boolean
+ * @default true
+ * @on Yes
+ * @off No
+ * @parent == Display Options ==
  * 
  * @param Show Item Name
  * @desc Whether or not the name of the item which has been picked up should be shown.
@@ -94,10 +110,12 @@ TantoMV.GetItemAnim = 1.0;
 
 (function() {
     let param = PluginManager.parameters("TantoMV_GetItemAnim");
+    const PLAY_PICKUP_SOUND = eval(param['Play Pickup Sounds']);
     const DEFAULT_PICKUP_SOUND = String(param['Pickup Sound']);
     const DEFAULT_VOLUME = Number(param['Pickup Sound Volume']);
     const DEFAULT_PITCH = Number(param['Pickup Sound Pitch']);
     const DEFAULT_PAN = Number(param['Pickup Sound Pan']);
+    const PLAY_BY_DEFAULT = eval(param['Play Animation by Default']);
     const SHOW_ITEM_NAME = eval(param['Show Item Name']);
     const SHOW_WINDOW = eval(param['Show Window']);
     const FONT_SIZE = Number(param['Font Size']);
@@ -106,57 +124,60 @@ TantoMV.GetItemAnim = 1.0;
     const ANIMATION_FADEOUT_START = Number(param['Fade Out Delay']);
     const OPACITY_STEP = 255 / (ANIMATION_DURATION - ANIMATION_FADEOUT_START);
 
-    console.log(param)
-
     let _Game_Party_gainItem = Game_Party.prototype.gainItem;
     Game_Party.prototype.gainItem = function(item, amount, includeEquip) {
 
         // Play pickup sound effect as defined by the item's note tags (or default values)
-        AudioManager.playSe({
-            name: item.meta.GetItemSound || DEFAULT_PICKUP_SOUND,
-            volume: item.meta.GetItemSoundVolume || DEFAULT_VOLUME,
-            pitch: item.meta.GetItemSoundPitch || DEFAULT_PITCH,
-            pan: item.meta.GetItemSoundPan || DEFAULT_PAN,
-        });
-
-        // Initialize window for icons and text
-        let animWindow = new Window_Base(0, 0, Graphics.width, Graphics.height);
-        if(!SHOW_WINDOW) {
-            animWindow.padding = 0;
-            animWindow.setBackgroundType(-1);
+        if(PLAY_PICKUP_SOUND || item.meta.GetItemSound) {
+            AudioManager.playSe({
+                name: item.meta.GetItemSound || DEFAULT_PICKUP_SOUND,
+                volume: item.meta.GetItemSoundVolume || DEFAULT_VOLUME,
+                pitch: item.meta.GetItemSoundPitch || DEFAULT_PITCH,
+                pan: item.meta.GetItemSoundPan || DEFAULT_PAN,
+            });
         }
-        animWindow.contents.fontSize = FONT_SIZE;
 
-        // Draw icon and text and calculate window width
-        const winText = (item.meta.GetItemShowName || SHOW_ITEM_NAME) ? `+${amount} ${item.name}` : `+${amount}`;
-        const winHeight = Math.max(70, 1.5 * animWindow.contents.fontSize);
-        const winWidth = animWindow.textWidth(winText) + 64 + 1.25 * animWindow.padding;
-        animWindow.drawIcon(item.iconIndex, 0, 0);
-        animWindow.drawText(winText, 48, 0);
+        if(item.meta.GetItemAnimation || PLAY_BY_DEFAULT) {
 
-        // Define animation loop for window
-        let step = 0;
-        function updateAnimWindow() {
-            // Move window to next position
-            let x = $gamePlayer.screenX() - (winWidth / 2);
-            let y = $gamePlayer.screenY() - (1.5 * $gameMap.tileHeight()) - (((step++) / 3) * ANIMATION_SPEED);
-            animWindow.move(x, y, winWidth, winHeight);
-
-            // Decrease opacity after initial delay
-            if(step >= ANIMATION_FADEOUT_START)
-                animWindow.contentsOpacity -= OPACITY_STEP;
-
-            // Check if animation should be finished, re-run next frame if not, otherwise close window
-            if(step < ANIMATION_DURATION)
-                requestAnimationFrame(updateAnimWindow);
-            else
-                animWindow.close();
+            // Initialize window for icons and text
+            let animWindow = new Window_Base(0, 0, Graphics.width, Graphics.height);
+            if(!SHOW_WINDOW) {
+                animWindow.padding = 0;
+                animWindow.setBackgroundType(-1);
+            }
+            animWindow.contents.fontSize = FONT_SIZE;
+    
+            // Draw icon and text and calculate window width
+            const winText = (item.meta.GetItemShowName || SHOW_ITEM_NAME) ? `+${amount} ${item.name}` : `+${amount}`;
+            const winHeight = Math.max(70, 1.5 * animWindow.contents.fontSize);
+            const winWidth = animWindow.textWidth(winText) + 64 + 1.25 * animWindow.padding;
+            animWindow.drawIcon(item.iconIndex, 0, 0);
+            animWindow.drawText(winText, 48, 0);
+    
+            // Define animation loop for window
+            let step = 0;
+            function updateAnimWindow() {
+                // Move window to next position
+                let x = $gamePlayer.screenX() - (winWidth / 2);
+                let y = $gamePlayer.screenY() - (1.5 * $gameMap.tileHeight()) - (((step++) / 3) * ANIMATION_SPEED);
+                animWindow.move(x, y, winWidth, winHeight);
+    
+                // Decrease opacity after initial delay
+                if(step >= ANIMATION_FADEOUT_START)
+                    animWindow.contentsOpacity -= OPACITY_STEP;
+    
+                // Check if animation should be finished, re-run next frame if not, otherwise close window
+                if(step < ANIMATION_DURATION)
+                    requestAnimationFrame(updateAnimWindow);
+                else
+                    animWindow.close();
+            }
+            updateAnimWindow(); // Initially set position of window
+    
+            // Add window to scene and enqueue animation loop
+            SceneManager._scene.addWindow(animWindow);
+            requestAnimationFrame(updateAnimWindow);
         }
-        updateAnimWindow(); // Initially set position of window
-
-        // Add window to scene and enqueue animation loop
-        SceneManager._scene.addWindow(animWindow);
-        requestAnimationFrame(updateAnimWindow);
 
         // Call base function to actually add item to inventory
         _Game_Party_gainItem.bind($gameParty, item, amount, includeEquip)();
