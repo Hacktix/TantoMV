@@ -8,4 +8,4 @@ This repository is a collection of various plugins compatible with RPG Maker MV.
 
 **User Interface:**
 
-* [GetItemAnim - Instant Item Pickup Feedback](https://raw.githubusercontent.com/Hacktix/TantoMV/master/plugins/TantoMV_GetItemAnim.js)
+* [ItemNotif - Instant Item Pickup Feedback](https://github.com/Hacktix/TantoMV/wiki/ItemNotif)
