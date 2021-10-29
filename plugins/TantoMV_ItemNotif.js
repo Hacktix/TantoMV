@@ -1,9 +1,9 @@
 //======================================================================================================================
-// TantoMV - GetItemAnim.js
+// TantoMV - ItemNotif.js
 //======================================================================================================================
 
 var TantoMV = TantoMV || {};
-TantoMV.GetItemAnim = 1.0;
+TantoMV.ItemNotif = 1.0;
 
 //======================================================================================================================
 /*:
@@ -128,7 +128,7 @@ TantoMV.GetItemAnim = 1.0;
  * In order to only show animations for specific items, you can use the following
  * note tag on every item you want to display the animation for:
  * 
- *     <GetItemAnimation>
+ *     <ItemNotifAnimation>
  * 
  * When an item with this note tag is picked up, the animation always plays.
  * 
@@ -136,7 +136,7 @@ TantoMV.GetItemAnim = 1.0;
  * name of the item should be shown using either the "Show Item Name" parameter
  * or by adding the following note tag to an item:
  * 
- *     <GetItemShowName>
+ *     <ItemNotifShowName>
  * 
  * 
  * # Pickup Sounds
@@ -148,14 +148,14 @@ TantoMV.GetItemAnim = 1.0;
  * 
  * You can change all settings listed above using the following note tags too:
  * 
- *      <GetItemSound:Item3>
- *      <GetItemSoundVolume:90>
- *      <GetItemSoundPitch:90>
- *      <GetItemSoundPan:-50>
+ *      <ItemNotifSound:Item3>
+ *      <ItemNotifSoundVolume:90>
+ *      <ItemNotifSoundPitch:90>
+ *      <ItemNotifSoundPan:-50>
  * 
  * (These values are all examples and can be changed as needed.)
  * 
- * * NOTE: An item which has a GetItemSound note tag will always play a pickup
+ * * NOTE: An item which has a ItemNotifSound note tag will always play a pickup
  *         sound no matter what the "Play Pickup Sounds" parameter is set to.
  * 
  */
@@ -163,7 +163,7 @@ TantoMV.GetItemAnim = 1.0;
 
 
 (function() {
-    let param = PluginManager.parameters("TantoMV_GetItemAnim");
+    let param = PluginManager.parameters("TantoMV_ItemNotifAnim");
     const PLAY_PICKUP_SOUND = eval(param['Play Pickup Sounds']);
     const DEFAULT_PICKUP_SOUND = String(param['Pickup Sound']);
     const DEFAULT_VOLUME = Number(param['Pickup Sound Volume']);
@@ -182,16 +182,16 @@ TantoMV.GetItemAnim = 1.0;
     Game_Party.prototype.gainItem = function(item, amount, includeEquip) {
 
         // Play pickup sound effect as defined by the item's note tags (or default values)
-        if(PLAY_PICKUP_SOUND || item.meta.GetItemSound) {
+        if(PLAY_PICKUP_SOUND || item.meta.ItemNotifSound) {
             AudioManager.playSe({
-                name: item.meta.GetItemSound || DEFAULT_PICKUP_SOUND,
-                volume: item.meta.GetItemSoundVolume || DEFAULT_VOLUME,
-                pitch: item.meta.GetItemSoundPitch || DEFAULT_PITCH,
-                pan: item.meta.GetItemSoundPan || DEFAULT_PAN,
+                name: item.meta.ItemNotifSound || DEFAULT_PICKUP_SOUND,
+                volume: item.meta.ItemNotifSoundVolume || DEFAULT_VOLUME,
+                pitch: item.meta.ItemNotifSoundPitch || DEFAULT_PITCH,
+                pan: item.meta.ItemNotifSoundPan || DEFAULT_PAN,
             });
         }
 
-        if(item.meta.GetItemAnimation || PLAY_BY_DEFAULT) {
+        if(item.meta.ItemNotifAnimation || PLAY_BY_DEFAULT) {
 
             // Initialize window for icons and text
             let animWindow = new Window_Base(0, 0, Graphics.width, Graphics.height);
@@ -202,7 +202,7 @@ TantoMV.GetItemAnim = 1.0;
             animWindow.contents.fontSize = FONT_SIZE;
     
             // Draw icon and text and calculate window width
-            const winText = (item.meta.GetItemShowName || SHOW_ITEM_NAME) ? `+${amount} ${item.name}` : `+${amount}`;
+            const winText = (item.meta.ItemNotifShowName || SHOW_ITEM_NAME) ? `+${amount} ${item.name}` : `+${amount}`;
             const winHeight = Math.max(70, 1.5 * animWindow.contents.fontSize);
             const winWidth = animWindow.textWidth(winText) + 64 + 1.25 * animWindow.padding;
             animWindow.drawIcon(item.iconIndex, 0, 0);
