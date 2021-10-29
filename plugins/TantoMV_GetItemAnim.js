@@ -104,6 +104,60 @@ TantoMV.GetItemAnim = 1.0;
  * @type number
  * @default 30
  * @parent == Animation Options ==
+ * 
+ * @help
+ * ==============================================================================
+ * # General Introduction
+ * ==============================================================================
+ * 
+ * This Plugin adds the option of displaying a short animation which plays when
+ * the player picks up an item, showing which item and which quantity the player
+ * picked up in a small notification above the character.
+ * 
+ * ==============================================================================
+ * # Usage
+ * ==============================================================================
+ * 
+ * # Pickup Animations
+ * 
+ * By default the plugin is configured to display the animation for every item
+ * that is picked up. In most cases however, this is not what you want. You can
+ * change the "Play Animation by Default" option in order to change this
+ * behavior.
+ * 
+ * In order to only show animations for specific items, you can use the following
+ * note tag on every item you want to display the animation for:
+ * 
+ *     <GetItemAnimation>
+ * 
+ * When an item with this note tag is picked up, the animation always plays.
+ * 
+ * The item icon is always shown in the animation, however, you can choose if the
+ * name of the item should be shown using either the "Show Item Name" parameter
+ * or by adding the following note tag to an item:
+ * 
+ *     <GetItemShowName>
+ * 
+ * 
+ * # Pickup Sounds
+ * 
+ * The plugin, also by default, plays an SE whenever an item is picked up.
+ * You can reconfigure the default sound file, volume, pitch and pan in the
+ * parameters. If you want to turn off pickup sounds entirely, you can do so
+ * by changing the "Play Pickup Sounds" parameter.
+ * 
+ * You can change all settings listed above using the following note tags too:
+ * 
+ *      <GetItemSound:Item3>
+ *      <GetItemSoundVolume:90>
+ *      <GetItemSoundPitch:90>
+ *      <GetItemSoundPan:-50>
+ * 
+ * (These values are all examples and can be changed as needed.)
+ * 
+ * * NOTE: An item which has a GetItemSound note tag will always play a pickup
+ *         sound no matter what the "Play Pickup Sounds" parameter is set to.
+ * 
  */
 //======================================================================================================================
 
